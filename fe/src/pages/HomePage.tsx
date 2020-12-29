@@ -10,7 +10,7 @@ const HomePage: React.FC = () => {
     <>
       <FileBrowser />
       Choosen: {filename}
-      <VideoPlaceHolder />
+      <VideoPlaceHolder key={filename} />
     </>
   );
 };

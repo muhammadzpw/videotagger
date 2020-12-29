@@ -10,13 +10,13 @@ class BackendApi extends HttpClient {
     return resp?.data;
   }
 
-  public async getState(filename: string) {
+  public async getState(filename: string): Promise<State> {
     return this.instance.get<any, any>(
       API.GET_STATE.replace(':filename', filename),
     );
   }
 
-  public async saveState(state: State) {
+  public async saveState(state: State): Promise<State> {
     return this.instance.post<any, State>(API.POST_STATE, state);
   }
 }

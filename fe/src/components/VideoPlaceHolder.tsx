@@ -9,9 +9,10 @@ import {
   Theme,
 } from '@material-ui/core';
 import MovieIcon from '@material-ui/icons/Movie';
-import React, { createRef, useContext, useState } from 'react';
+import React, { createRef, useContext, useEffect, useState } from 'react';
 
 import { backendApi } from '../api';
+import { useFetch } from '../hooks/useFetchTypes';
 import { Label } from '../models/response';
 
 import { FileContext } from './FileContext';
@@ -25,10 +26,16 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const VideoPlaceHolder: React.FC = () => {
-  const classes = useStyles();
   const { filename } = useContext(FileContext);
   const videoRef = createRef<HTMLVideoElement>();
   const [labels, setLabels] = useState<Label[]>([]);
+  const { data } = useFetch(backendApi.getState(filename));
+
+  useEffect(() => {
+    if (data) {
+      setLabels(data.labels);
+    }
+  }, [data, setLabels]);
 
   const label = async (lbl: string) => {
     if (videoRef.current) {
