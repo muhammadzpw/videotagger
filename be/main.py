@@ -1,14 +1,14 @@
-import glob
+import os
 
 from flask import Flask
 
-app = Flask(__name__, static_url_path="static")
+app = Flask(__name__, static_url_path="/static")
 
 
 @app.route("/api")
 def hello():
-    print(glob.glob("*.mp4"))
-    return {"data": "cool"}
+    data = os.listdir("static/data")
+    return {"data": "cool", "files": data}
 
 
 if __name__ == "__main__":
