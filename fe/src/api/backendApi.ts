@@ -1,33 +1,22 @@
 import { CONFIG } from '../constants/config';
-import { LoginResponse, User } from '../models/response';
+import { State } from '../models/response';
 
 import { API } from './constants';
 import { HttpClient } from './HttpClient';
 
 class BackendApi extends HttpClient {
-  public async login(email: string, password: string) {
-    const response = await this.instance.post<any, LoginResponse>(
-      API.AUTH.LOGIN,
-      {
-        email,
-        password,
-      },
+  public async getFiles() {
+    return this.instance.get<any, string[]>(API.DATA);
+  }
+
+  public async getState(filename: string) {
+    return this.instance.get<any, any>(
+      API.GET_STATE.replace(':filename', filename),
     );
-    return response;
   }
 
-  public async logout() {
-    await this.instance.delete(API.AUTH.LOGOUT);
-  }
-
-  public async me() {
-    return await this.instance.get<any, User>(API.AUTH.ME);
-  }
-
-  public async loginByCode(code: string) {
-    return await this.instance.post<any, LoginResponse>(API.AUTH.LOGIN_CODE, {
-      code,
-    });
+  public async saveState(state: State) {
+    return this.instance.post<any, State>(API.POST_STATE, state);
   }
 }
 

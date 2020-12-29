@@ -1,10 +1,9 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
+export interface Label {
+  label: string;
+  time: number;
 }
-
-export interface LoginResponse {
-  sessionId: string;
-  user: User;
+export interface State {
+  filename: string;
+  labels: Label[];
+  last_time: number;
 }
