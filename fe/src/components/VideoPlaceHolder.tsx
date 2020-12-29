@@ -75,6 +75,12 @@ const VideoPlaceHolder: React.FC = () => {
     }
   };
 
+  const goto = (sec: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = sec;
+    }
+  };
+
   return (
     <Paper>
       <video
@@ -104,7 +110,7 @@ const VideoPlaceHolder: React.FC = () => {
       </div>
 
       <div>
-        <LabelsViewer labels={labels} />
+        <LabelsViewer labels={labels} goto={goto} />
       </div>
     </Paper>
   );
@@ -112,11 +118,13 @@ const VideoPlaceHolder: React.FC = () => {
 
 interface LabelsViewerProps {
   labels: Label[];
+  goto: (sec: number) => void;
 }
-const LabelsViewer: React.FC<LabelsViewerProps> = ({ labels }) => {
+const LabelsViewer: React.FC<LabelsViewerProps> = ({ labels, goto }) => {
   const classes = useStyles();
   const [selectedIdx, setSelectedIdx] = useState<number>();
-  const onListClick = (idx: number) => () => {
+  const onListClick = (idx: number, time: number) => () => {
+    goto(time);
     setSelectedIdx(idx);
   };
   return (
@@ -127,7 +135,7 @@ const LabelsViewer: React.FC<LabelsViewerProps> = ({ labels }) => {
             button
             key={idx}
             selected={selectedIdx === idx}
-            onClick={onListClick(idx)}
+            onClick={onListClick(idx, label.time)}
           >
             <ListItemIcon>
               <MovieIcon />
