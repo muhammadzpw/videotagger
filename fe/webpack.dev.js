@@ -23,6 +23,18 @@ module.exports = merge(common, {
     port: 3000,
     historyApiFallback: true,
     contentBase: './dist',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000/',
+        secure: false,
+        changeOrigin: true
+      },
+      '/data': {
+        target: 'http://localhost:5000/',
+        secure: false,
+        changeOrigin: true
+      }
+    }
   },
 
   plugins: [

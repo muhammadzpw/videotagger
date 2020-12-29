@@ -43,6 +43,7 @@
     "webpack-dev-server": "3.11.0",
     "webpack-merge": "4.2.2"
   },
+  "proxy": "http://localhost:3000",
   "scripts": {
     "build-dev": "webpack --config webpack.dev.js --progress",
     "build-prod": "webpack --config webpack.prod.js --progress",
