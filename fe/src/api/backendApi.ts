@@ -5,8 +5,9 @@ import { API } from './constants';
 import { HttpClient } from './HttpClient';
 
 class BackendApi extends HttpClient {
-  public async getFiles() {
-    return this.instance.get<any, string[]>(API.DATA);
+  public async getFiles(): Promise<string[]> {
+    const resp = await this.instance.get<any, { data: string[] }>(API.DATA);
+    return resp?.data;
   }
 
   public async getState(filename: string) {

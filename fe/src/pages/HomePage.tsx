@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
+
+import { FileBrowser } from '../components/FileBrowser';
+import { FileContext } from '../components/FileContext';
+import { VideoPlaceHolder } from '../components/VideoPlaceHolder';
 
 const HomePage: React.FC = () => {
-  return <>Home</>;
+  const { filename } = useContext(FileContext);
+  return (
+    <>
+      <FileBrowser />
+      Choosen: {filename}
+      <VideoPlaceHolder />
+    </>
+  );
 };
 
 export { HomePage };

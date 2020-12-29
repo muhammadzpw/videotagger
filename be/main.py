@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 from datetime import datetime
@@ -23,8 +24,8 @@ def upload_data(path):
 
 @app.route("/api/data", methods=["GET"])
 def list_data():
-    data = os.listdir(UPLOAD_FOLDER)
-    return data
+    data = glob.glob(join(UPLOAD_FOLDER, "*.mp4"))
+    return make_message("data", [x.replace(UPLOAD_FOLDER + "/", "") for x in data])
 
 
 def get_state_file(filename):
@@ -35,7 +36,7 @@ def get_state_file(filename):
 def save_state():
     req_body = request.get_json()
     filename = get_state_file(req_body["filename"])
-    with open(filename, "w+") as json_file:
+    with open(join(UPLOAD_FOLDER, filename), "w+") as json_file:
         json_text = json.dumps(req_body)
         json_file.write(json_text)
     return req_body
