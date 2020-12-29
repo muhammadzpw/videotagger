@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <video height="600" id="myVideo" controls>
+      <source src="data/masterchef-data1.mp4" type="video/mp4" />
+      <track kind="descriptions" />
+      Not supported
+    </video>
+    <br />
+    <button onclick="prev(60)" type="button">Prev 60s</button>
+    <button onclick="prev(10)" type="button">Prev 10s</button>
+    <button onclick="prev(1)" type="button">Prev 1s</button>
+    <button onclick="togglePlayPause()" type="button">Play/Pause</button>
+    <button onclick="next(1)" type="button">Next 1s</button>
+    <button onclick="next(10)" type="button">Next 10s</button>
+    <button onclick="next(60)" type="button">Next 60s</button>
+    <br />
+    <button onclick="addIklan()" type="button">Iklan</button>
+    <button onclick="addNonIklan()" type="button">Non Iklan</button>
+    <p>Time: <br /><span id="time"></span></p>
+
+    <script>
+      var breakpoints = [];
+      var timeplaceholder = document.getElementById("time");
+      var vid = document.getElementById("myVideo");
+
+      function togglePlayPause() {
+        if (vid.paused) {
+          vid.play();
+        } else {
+          vid.pause();
+        }
+      }
+
+      function getCurTime() {
+        vid.pause();
+        return vid.currentTime;
+      }
+
+      function addIklan() {
+        var currentTime = getCurTime();
+        breakpoints.push(["iklan", currentTime]);
+        console.log(breakpoints);
+
+        timeplaceholder.innerHTML += "iklan: " + currentTime + "<br/>";
+      }
+
+      function addNonIklan() {
+        var currentTime = getCurTime();
+        breakpoints.push(["noniklan", currentTime]);
+        console.log(breakpoints);
+        timeplaceholder.innerHTML += "noniklan: " + currentTime + "<br/>";
+      }
+
+      function next(sec) {
+        vid.currentTime += sec;
+      }
+
+      function prev(sec) {
+        vid.currentTime -= sec;
+      }
+    </script>
+  </body>
+</html>
