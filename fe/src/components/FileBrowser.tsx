@@ -1,4 +1,4 @@
-import { CircularProgress, Theme } from '@material-ui/core';
+import { CircularProgress, Divider, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import React, { useContext } from 'react';
 
@@ -28,6 +28,7 @@ const FileBrowser: React.FC = () => {
   const classes = useStyles();
   const { setFilename } = useContext(FileContext);
   const { data, loading, error } = useFetch(backendApi.getFiles());
+  const { data: dataUrl } = useFetch(backendApi.getUrls());
 
   return (
     <div className={classes.root}>
@@ -46,6 +47,19 @@ const FileBrowser: React.FC = () => {
               key={`file-${idx}`}
             >
               {file}
+            </div>
+          );
+        })}
+      <Divider />
+      {dataUrl &&
+        dataUrl.map((urldata, idx) => {
+          return (
+            <div
+              className={classes.file}
+              onClick={() => setFilename(urldata.url)}
+              key={`url-${idx}`}
+            >
+              {urldata.filename}
             </div>
           );
         })}

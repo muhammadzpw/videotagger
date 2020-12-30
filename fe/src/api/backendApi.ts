@@ -1,5 +1,5 @@
 import { CONFIG } from '../constants/config';
-import { State } from '../models/response';
+import { DataUrl, State } from '../models/response';
 
 import { API } from './constants';
 import { HttpClient } from './HttpClient';
@@ -7,6 +7,13 @@ import { HttpClient } from './HttpClient';
 class BackendApi extends HttpClient {
   public async getFiles(): Promise<string[]> {
     const resp = await this.instance.get<any, { data: string[] }>(API.DATA);
+    return resp?.data;
+  }
+
+  public async getUrls(): Promise<DataUrl[]> {
+    const resp = await this.instance.get<any, { data: DataUrl[] }>(
+      API.DATA_URL,
+    );
     return resp?.data;
   }
 

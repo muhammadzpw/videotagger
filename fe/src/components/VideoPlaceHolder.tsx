@@ -81,6 +81,8 @@ const VideoPlaceHolder: React.FC = () => {
     }
   };
 
+  const videoSrc = filename.startsWith('http') ? filename : `data/${filename}`;
+
   return (
     <Paper>
       <video
@@ -91,7 +93,7 @@ const VideoPlaceHolder: React.FC = () => {
         controls
         ref={videoRef}
       >
-        <source src={`data/${filename}`} type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
         <track kind="descriptions" />
         Not supported
       </video>
