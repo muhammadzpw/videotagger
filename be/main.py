@@ -21,20 +21,17 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 
 @app.route("/data/<path:path>", methods=["GET"])
-@cross_origin()
 def upload_data(path):
     return send_from_directory(UPLOAD_FOLDER, path)
 
 
 @app.route("/api/data", methods=["GET"])
-@cross_origin()
 def list_data():
     data = glob.glob(join(UPLOAD_FOLDER, "*.mp4"))
     return make_message("data", [x.replace(UPLOAD_FOLDER + "/", "") for x in data])
 
 
 @app.route("/api/data-url", methods=["GET"])
-@cross_origin()
 def list_data_url():
     return make_message(
         "data",
@@ -52,7 +49,6 @@ def get_state_file(filename):
 
 
 @app.route("/api/states", methods=["POST"])
-@cross_origin()
 def save_state():
     req_body = request.get_json()
     filename = get_state_file(req_body["filename"])
@@ -63,7 +59,6 @@ def save_state():
 
 
 @app.route("/api/states/<filename>", methods=["GET"])
-@cross_origin()
 def get_state(filename):
     with open(get_state_file(filename), "r+") as json_file:
         json_obj = json_file.read()
@@ -71,7 +66,6 @@ def get_state(filename):
 
 
 @app.route("/api/upload", methods=["POST"])
-@cross_origin()
 def upload_file():
     files = request.files.getlist("file")
     print(files)
@@ -94,6 +88,13 @@ def upload_file():
     return make_message(
         "Successfully upload {} data".format(len(file_responses)), file_responses
     )
+
+
+@app.after_request
+def enablecors(response):
+    header = response.headers
+    header["Access-Control-Allow-Origin"] = True
+    return response
 
 
 if __name__ == "__main__":
