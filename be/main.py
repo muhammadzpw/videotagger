@@ -93,7 +93,6 @@ def upload_file():
 @app.after_request
 def enablecors(response):
     header = response.headers
-    header["Access-Control-Allow-Origin"] = "*"
     header["Access-Control-Allow-Credentials"] = "true"
     return response
 
