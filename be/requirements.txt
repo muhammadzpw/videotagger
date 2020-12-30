@@ -1,3 +1,4 @@
 Flask==1.1.2
 gunicorn==20.0.4
 black==20.8b1
+Flask-Cors==3.0.9
