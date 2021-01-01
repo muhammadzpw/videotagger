@@ -4,10 +4,62 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      button {
+        padding: 8px;
+        cursor: pointer;
+      }
+      .label {
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        border: 1px #eeeeee solid;
+      }
+      .label div {
+        cursor: pointer;
+
+        flex-grow: 1;
+      }
+      .label:hover {
+        background: #eeeeee;
+      }
+      .label:last-child {
+        border: none;
+      }
+      .input {
+        padding: 8px;
+        min-width: 400px;
+      }
+    </style>
   </head>
   <body>
-    <video height="600" id="myVideo" controls>
-      <source src="data/masterchef-data1.mp4" type="video/mp4" />
+    <table>
+      <tr>
+        <td>Filename</td>
+        <td>
+          <input type="text" class="input" placeholder="Filename" id="file" />
+        </td>
+      </tr>
+      <tr>
+        <td>Video URL</td>
+        <td>
+          <input
+            type="text"
+            class="input"
+            placeholder="Video URL"
+            id="videoUrl"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <button onclick="applyVideo()">Apply</button>
+        </td>
+      </tr>
+    </table>
+    <br />
+    <video height="360" width="640" id="myVideo" controls>
+      <source src="" type="video/mp4" />
       <track kind="descriptions" />
       Not supported
     </video>
@@ -22,12 +74,66 @@
     <br />
     <button onclick="addIklan()" type="button">Iklan</button>
     <button onclick="addNonIklan()" type="button">Non Iklan</button>
-    <p>Time: <br /><span id="time"></span></p>
+    <p>Label:</p>
+
+    <div id="time">No label data.</div>
 
     <script>
+      var listFiles = [
+        {
+          filename: "",
+          videoUrl: "",
+        },
+      ];
+
+      const BASEURL = "http://localhost:5000";
+
+      const getUrl = (path) => `${BASEURL}${path}`;
+
+      var filename = "";
+      var videoUrl = "";
       var breakpoints = [];
       var timeplaceholder = document.getElementById("time");
+      var filenameInput = document.getElementById("file");
+      var videoUrlInput = document.getElementById("videoUrl");
       var vid = document.getElementById("myVideo");
+
+      var state = {
+        filename: filename,
+        labels: [],
+        last_time: getCurTime(),
+      };
+
+      var initialState = { ...state };
+
+      function changeVideoSource(url) {
+        vid.outerHTML = `<video height="360" width="640" id="myVideo" controls>
+          <source src="${url}" type="video/mp4" />
+          <track kind="descriptions" />
+          Not supported
+        </video>`;
+        vid = document.getElementById("myVideo");
+      }
+
+      function applyVideo() {
+        filename = filenameInput.value;
+        videoUrl = videoUrlInput.value;
+        state = { ...initialState, filename: filename };
+        timeplaceholder.innerHTML = "";
+        getState(filename);
+        changeVideoSource(videoUrl);
+      }
+
+      function getState(filename) {
+        fetch(getUrl("/api/states/" + filename))
+          .then((res) => res.json())
+          .then((data) => {
+            state = data;
+            goto(state.last_time);
+            renderState(data);
+          })
+          .catch((err) => console.warn("Error getting state " + filename, err));
+      }
 
       function togglePlayPause() {
         if (vid.paused) {
@@ -42,19 +148,57 @@
         return vid.currentTime;
       }
 
-      function addIklan() {
+      function label(labelName) {
+        console.log("labeling");
         var currentTime = getCurTime();
-        breakpoints.push(["iklan", currentTime]);
-        console.log(breakpoints);
+        const item = {
+          label: labelName,
+          time: currentTime,
+        };
 
-        timeplaceholder.innerHTML += "iklan: " + currentTime + "<br/>";
+        const newLabels = [...state.labels, item].sort(
+          (a, b) => a.time - b.time
+        );
+        state = {
+          ...state,
+          labels: [...newLabels],
+          last_time: getCurTime(),
+        };
+
+        saveState();
+        renderState(state);
+      }
+
+      function removeLabel(idx) {
+        console.log("remove label ", idx);
+        const newLabels = state.labels.filter((item, id) => idx !== id);
+        state = {
+          ...state,
+          labels: [...newLabels],
+          last_time: getCurTime(),
+        };
+        saveState();
+        renderState(state);
+      }
+
+      function saveState() {
+        fetch(getUrl("/api/states"), {
+          method: "POST",
+          body: JSON.stringify(state),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(() => console.log("Successfully save state"))
+          .catch((err) => console.warn("Something went wrong", err));
+      }
+
+      function addIklan() {
+        label("iklan");
       }
 
       function addNonIklan() {
-        var currentTime = getCurTime();
-        breakpoints.push(["noniklan", currentTime]);
-        console.log(breakpoints);
-        timeplaceholder.innerHTML += "noniklan: " + currentTime + "<br/>";
+        label("non-iklan");
       }
 
       function next(sec) {
@@ -64,6 +208,24 @@
       function prev(sec) {
         vid.currentTime -= sec;
       }
+
+      function goto(sec) {
+        vid.currentTime = sec;
+      }
+
+      function renderLabel(label, idx) {
+        return `<div class="label"><div onClick="goto(${label.time})">${label.time} - ${label.label}</div><button onClick="removeLabel(${idx})">delete</button></div>`;
+      }
+
+      function renderLabelList(labels) {
+        return labels.map((label, idx) => renderLabel(label, idx)).join("");
+      }
+
+      function renderState(state) {
+        timeplaceholder.innerHTML = renderLabelList(state.labels);
+      }
+
+      document.addEventListener("unload", () => {});
     </script>
   </body>
 </html>
