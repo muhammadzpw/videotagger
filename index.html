@@ -3,8 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Video Tagger</title>
     <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
       button {
         padding: 8px;
         cursor: pointer;
@@ -13,11 +17,13 @@
         padding: 8px 16px;
         display: flex;
         align-items: center;
-        border: 1px #eeeeee solid;
+        border-bottom: 1px #eeeeee solid;
+      }
+      .label.selected {
+        background-color: #eeeeee;
       }
       .label div {
         cursor: pointer;
-
         flex-grow: 1;
       }
       .label:hover {
@@ -30,10 +36,29 @@
         padding: 8px;
         min-width: 400px;
       }
+
+      .main-flex {
+        display: flex;
+        height: max-content;
+        max-height: 100vh;
+      }
+      .main-flex div {
+        max-height: 100%;
+        overflow: auto;
+      }
+      .label-container {
+        flex-grow: 1;
+        padding: 0px 8px;
+        border-left: 1px solid #eeeeee;
+      }
+
+      #options {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <table>
+    <table id="options">
       <tr>
         <td>Filename</td>
         <td>
@@ -57,35 +82,33 @@
         </td>
       </tr>
     </table>
-    <br />
-    <video height="360" width="640" id="myVideo" controls>
-      <source src="" type="video/mp4" />
-      <track kind="descriptions" />
-      Not supported
-    </video>
-    <br />
-    <button onclick="prev(60)" type="button">Prev 60s</button>
-    <button onclick="prev(10)" type="button">Prev 10s</button>
-    <button onclick="prev(1)" type="button">Prev 1s</button>
-    <button onclick="togglePlayPause()" type="button">Play/Pause</button>
-    <button onclick="next(1)" type="button">Next 1s</button>
-    <button onclick="next(10)" type="button">Next 10s</button>
-    <button onclick="next(60)" type="button">Next 60s</button>
-    <br />
-    <button onclick="addIklan()" type="button">Iklan</button>
-    <button onclick="addNonIklan()" type="button">Non Iklan</button>
-    <p>Label:</p>
+    <div class="main-flex">
+      <div class="video-container">
+        <video  id="myVideo" controls>
+          <source src="" type="video/mp4" />
+          <track kind="descriptions" />
+          Not supported
+        </video>
+        <br />
+        <button onclick="prev(60)" type="button">Prev 60s</button>
+        <button onclick="prev(10)" type="button">Prev 10s</button>
+        <button onclick="prev(1)" type="button">Prev 1s</button>
+        <button onclick="togglePlayPause()" type="button">Play/Pause</button>
+        <button onclick="next(1)" type="button">Next 1s</button>
+        <button onclick="next(10)" type="button">Next 10s</button>
+        <button onclick="next(60)" type="button">Next 60s</button>
+        <br />
+        <button onclick="addIklan()" type="button">Iklan</button>
+        <button onclick="addNonIklan()" type="button">Non Iklan</button>
 
-    <div id="time">No label data.</div>
+        <div id="file-browser"></div>
+      </div>
+      <div class="label-container">
+        <div id="time">No label data.</div>
+      </div>
+    </div>
 
     <script>
-      var listFiles = [
-        {
-          filename: "",
-          videoUrl: "",
-        },
-      ];
-
       const BASEURL = "http://localhost:5000";
 
       const getUrl = (path) => `${BASEURL}${path}`;
@@ -97,6 +120,65 @@
       var filenameInput = document.getElementById("file");
       var videoUrlInput = document.getElementById("videoUrl");
       var vid = document.getElementById("myVideo");
+      var fileBrowser = document.getElementById("file-browser");
+
+      var listFiles = [
+        {
+          filename: "2020-09-16_18-20-55.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16_18-20-55.mp4",
+        },
+        {
+          filename: "2020-08-22_11-06-52.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2011-06-52.mp4",
+        },
+        {
+          filename: "2020-08-22_13-29-12.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2013-29-12.mp4",
+        },
+        {
+          filename: "2020-08-22_18-44-03.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2018-44-03.mp4",
+        },
+        {
+          filename: "2020-09-16_11-38-38.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16%2011-38-38.mp4",
+        },
+        {
+          filename: "2020-09-16_14-48-47.mp4",
+          videoUrl:
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16%2014-48-47.mp4",
+        },
+      ];
+      function renderFileBrowser() {
+        fileBrowser.innerHTML = listFiles
+          .map((data, idx) => {
+            return `
+            <div class="label">
+              <div onClick="changeVideo('${data.filename}', '${data.videoUrl}');select(this);">
+              ${data.filename}<br/>
+              <small>
+              ${data.videoUrl}</small>
+              </div>
+            </div>`;
+          })
+          .join("");
+      }
+      renderFileBrowser();
+
+      function select(el) {
+        const currentItem = el.parentElement;
+        const listHolder = currentItem.parentElement;
+        
+        for (const item of listHolder.children) {
+          item.className = "label"
+        }
+        currentItem.className = "label selected";
+      }
 
       var state = {
         filename: filename,
@@ -107,7 +189,7 @@
       var initialState = { ...state };
 
       function changeVideoSource(url) {
-        vid.outerHTML = `<video height="360" width="640" id="myVideo" controls>
+        vid.outerHTML = `<video width="720" id="myVideo" controls>
           <source src="${url}" type="video/mp4" />
           <track kind="descriptions" />
           Not supported
@@ -118,6 +200,10 @@
       function applyVideo() {
         filename = filenameInput.value;
         videoUrl = videoUrlInput.value;
+        changeVideo(filename, videoUrl);
+      }
+
+      function changeVideo(filename, videoUrl) {
         state = { ...initialState, filename: filename };
         timeplaceholder.innerHTML = "";
         getState(filename);
@@ -214,7 +300,12 @@
       }
 
       function renderLabel(label, idx) {
-        return `<div class="label"><div onClick="goto(${label.time})">${label.time} - ${label.label}</div><button onClick="removeLabel(${idx})">delete</button></div>`;
+        return `
+        <div class="label">
+          <div onClick="goto(${label.time})">${label.time} - ${label.label}</div>
+          <button onClick="removeLabel(${idx})">delete</button>
+        </div>
+        `;
       }
 
       function renderLabelList(labels) {
