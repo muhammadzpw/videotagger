@@ -6,6 +6,7 @@
     <title>Video Tagger</title>
     <style>
       body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         padding: 0;
         margin: 0;
       }
@@ -84,7 +85,7 @@
     </table>
     <div class="main-flex">
       <div class="video-container">
-        <video  id="myVideo" controls>
+        <video width="720" height="405" id="myVideo" controls>
           <source src="" type="video/mp4" />
           <track kind="descriptions" />
           Not supported
@@ -104,12 +105,15 @@
         <div id="file-browser"></div>
       </div>
       <div class="label-container">
-        <div id="time">No label data.</div>
+        <div id="time">Select a video</div>
+        <hr/>
+        <h3>Label Scene</h3>
+        <div id="label-scene">Select a video</div>
       </div>
     </div>
 
     <script>
-      const BASEURL = "http://localhost:5000";
+      const BASEURL = "http://localhost:8000";
 
       const getUrl = (path) => `${BASEURL}${path}`;
 
@@ -117,6 +121,7 @@
       var videoUrl = "";
       var breakpoints = [];
       var timeplaceholder = document.getElementById("time");
+      var label_scene_placeholder = document.getElementById("label-scene");
       var filenameInput = document.getElementById("file");
       var videoUrlInput = document.getElementById("videoUrl");
       var vid = document.getElementById("myVideo");
@@ -131,27 +136,27 @@
         {
           filename: "2020-08-22_11-06-52.mp4",
           videoUrl:
-            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2011-06-52.mp4",
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22_11-06-52.mp4",
         },
         {
           filename: "2020-08-22_13-29-12.mp4",
           videoUrl:
-            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2013-29-12.mp4",
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22_13-29-12.mp4",
         },
         {
           filename: "2020-08-22_18-44-03.mp4",
           videoUrl:
-            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22%2018-44-03.mp4",
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-08-22_18-44-03.mp4",
         },
         {
           filename: "2020-09-16_11-38-38.mp4",
           videoUrl:
-            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16%2011-38-38.mp4",
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16_11-38-38.mp4",
         },
         {
           filename: "2020-09-16_14-48-47.mp4",
           videoUrl:
-            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16%2014-48-47.mp4",
+            "file:///Volumes/MZPW/TesisData/videotagger/be/static/data/2020-09-16_14-48-47.mp4",
         },
       ];
       function renderFileBrowser() {
@@ -189,7 +194,7 @@
       var initialState = { ...state };
 
       function changeVideoSource(url) {
-        vid.outerHTML = `<video width="720" id="myVideo" controls>
+        vid.outerHTML = `<video width="720" height="405" id="myVideo" controls>
           <source src="${url}" type="video/mp4" />
           <track kind="descriptions" />
           Not supported
@@ -207,6 +212,7 @@
         state = { ...initialState, filename: filename };
         timeplaceholder.innerHTML = "";
         getState(filename);
+        getLabelScene(filename);
         changeVideoSource(videoUrl);
       }
 
@@ -219,6 +225,16 @@
             renderState(data);
           })
           .catch((err) => console.warn("Error getting state " + filename, err));
+      }
+
+      function getLabelScene(filename) {
+        fetch(getUrl("/api/label-scene/" + filename))
+          .then((res) => res.json())
+          .then((data) => {
+            state = data.data;
+            renderLabelScene(state);
+          })
+          .catch((err) => console.warn("Error getting label scene " + filename, err));
       }
 
       function togglePlayPause() {
@@ -310,10 +326,29 @@
 
       function renderLabelList(labels) {
         return labels.map((label, idx) => renderLabel(label, idx)).join("");
-      }
+      } 
 
       function renderState(state) {
         timeplaceholder.innerHTML = renderLabelList(state.labels);
+      }
+
+      function renderLabelSceneItem(row) {
+        time = row["Start Time (seconds)"]
+        label = row["label"]
+        scene = row["scene_number"]
+        return `
+        <div class="label">
+          <div onClick="goto(${time})">${time} - Scene ${scene} - ${label}</div>
+        </div>
+        `;
+      }
+
+      function renderLabelSceneList(state) {
+        return state.map((row) => renderLabelSceneItem(row)).join("");
+      }
+
+      function renderLabelScene(state) {
+        label_scene_placeholder.innerHTML = renderLabelSceneList(state);
       }
 
       document.addEventListener("unload", () => {});
