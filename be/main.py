@@ -65,6 +65,20 @@ def get_state(filename):
         return json.loads(json_obj)
 
 
+@app.route("/api/label-scene/<filename>", methods=["GET"])
+def get_label_scene(filename):
+    with open(
+        join(
+            app.config["UPLOAD_FOLDER"],
+            "label_scene",
+            filename.replace(".mp4", "") + "-Scene-Label.json",
+        ),
+        "r+",
+    ) as json_file:
+        json_obj = json_file.read()
+        return {"data": json.loads(json_obj)}
+
+
 @app.route("/api/upload", methods=["POST"])
 def upload_file():
     files = request.files.getlist("file")
